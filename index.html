@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>スケジュール調整自動化ツール</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #dde0ea;
+      --sd: #b8bcc8;
+      --sl: #ffffff;
+      --text-main: #2e3346;
+      --text-sub: #7a82a0;
+      --text-num: #6b7490;
+    }
+
+    body {
+      background: #cdd0dc;
+      font-family: 'Noto Sans JP', 'Inter', sans-serif;
+      color: var(--text-main);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 40px 20px;
+    }
+
+    /* ━━━ メインカード ━━━ */
+    .main-card {
+      background: var(--bg);
+      border-radius: 28px;
+      box-shadow:
+        18px 18px 48px #b0b4c4,
+        -18px -18px 48px #ffffff;
+      padding: 52px 48px 48px;
+      max-width: 980px;
+      width: 100%;
+    }
+
+    /* ━━━ ヘッダー ━━━ */
+    .header {
+      text-align: center;
+      margin-bottom: 52px;
+    }
+
+    .header-title {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(1rem, 3vw, 1.45rem);
+      font-weight: 700;
+      letter-spacing: 0.22em;
+      color: var(--text-main);
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+
+    .header-sub {
+      font-family: 'Inter', sans-serif;
+      font-size: clamp(0.6rem, 1.5vw, 0.72rem);
+      font-weight: 400;
+      letter-spacing: 0.3em;
+      color: var(--text-sub);
+      text-transform: uppercase;
+    }
+
+    /* ━━━ フローグリッド ━━━ */
+    .flow-grid {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      margin-bottom: 52px;
+      flex-wrap: nowrap;
+    }
+
+    /* ━━━ 各カード ━━━ */
+    .item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-shrink: 0;
+    }
+
+    /* ━━━ 矢印 ━━━ */
+    .flow-arrow {
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      margin-bottom: 0;
+    }
+
+    .flow-arrow svg {
+      width: 22px;
+      height: 16px;
+      overflow: visible;
+    }
+
+    /* グラデーション外リング */
+    .ring {
+      width: 188px;
+      height: 188px;
+      border-radius: 50%;
+      padding: 7px;
+      position: relative;
+      margin-bottom: 28px;
+      transition: transform 0.35s ease, filter 0.35s ease;
+      cursor: default;
+    }
+
+    .ring:hover {
+      transform: translateY(-10px);
+      filter: drop-shadow(0 16px 24px rgba(0,0,0,0.18));
+    }
+
+    .ring-01 { background: conic-gradient(from 120deg, #7dd8e0, #4fc4d8, #a8e8f0, #4fc4d8, #7dd8e0); }
+    .ring-02 { background: conic-gradient(from 120deg, #a0b8f8, #6b8ef0, #b8ccff, #6b8ef0, #a0b8f8); }
+    .ring-03 { background: conic-gradient(from 120deg, #c8a0f0, #9b70e8, #d8b8ff, #9b70e8, #c8a0f0); }
+    .ring-04 { background: conic-gradient(from 120deg, #f0c87a, #e8956e, #f8dca0, #e8956e, #f0c87a); }
+
+    /* 内側の白い円（ニューモ） */
+    .ring-inner {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background: var(--bg);
+      box-shadow:
+        inset 6px 6px 16px var(--sd),
+        inset -6px -6px 16px var(--sl);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+      padding: 20px 14px;
+      text-align: center;
+    }
+
+    /* 丸の中：番号 */
+    .c-num {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      margin-bottom: 6px;
+    }
+
+    .ring-01 .c-num { color: #4fc4d8; }
+    .ring-02 .c-num { color: #6b8ef0; }
+    .ring-03 .c-num { color: #9b70e8; }
+    .ring-04 .c-num { color: #e8956e; }
+
+    /* SVGアイコン */
+    .icon-svg {
+      width: 34px;
+      height: 34px;
+      margin-bottom: 7px;
+      flex-shrink: 0;
+    }
+
+    .ring-01 .icon-svg { stroke: #4fc4d8; }
+    .ring-02 .icon-svg { stroke: #6b8ef0; }
+    .ring-03 .icon-svg { stroke: #9b70e8; }
+    .ring-04 .icon-svg { stroke: #e8956e; }
+
+    /* 丸の中：日本語タイトル */
+    .c-title {
+      font-size: 0.82rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--text-main);
+      margin-bottom: 7px;
+    }
+
+    /* 丸の中：区切り線 */
+    .c-divider {
+      width: 24px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #aab2c8, transparent);
+      margin-bottom: 7px;
+      flex-shrink: 0;
+    }
+
+    /* 丸の中：説明テキスト */
+    .c-desc {
+      font-size: 0.58rem;
+      font-weight: 300;
+      color: var(--text-sub);
+      line-height: 1.75;
+      letter-spacing: 0.03em;
+    }
+
+    /* ━━━ 下部セクション ━━━ */
+    .divider {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #b8bcc8 20%, #b8bcc8 80%, transparent);
+      margin-bottom: 36px;
+    }
+
+    .bottom-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    /* インセットパネル */
+    .inset-panel {
+      background: var(--bg);
+      border-radius: 16px;
+      box-shadow:
+        inset 4px 4px 10px var(--sd),
+        inset -4px -4px 10px var(--sl);
+      padding: 24px 28px;
+    }
+
+    .panel-eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.28em;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .panel-eyebrow::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, #b0b8cc, transparent);
+    }
+
+    .config-rows {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .config-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+    }
+
+    .config-key {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: #9b70e8;
+      text-transform: uppercase;
+      width: 80px;
+      flex-shrink: 0;
+    }
+
+    .config-val {
+      font-size: 0.72rem;
+      font-weight: 400;
+      color: var(--text-main);
+      letter-spacing: 0.04em;
+    }
+
+    /* notify パネル */
+    .notify-panel {
+      display: flex;
+      gap: 18px;
+      align-items: flex-start;
+    }
+
+    .notify-icon-circle {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: var(--bg);
+      box-shadow:
+        4px 4px 10px var(--sd),
+        -4px -4px 10px var(--sl);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .notify-icon-circle svg {
+      width: 22px;
+      height: 22px;
+      stroke: #9b70e8;
+    }
+
+    .notify-title {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+
+    .notify-body {
+      font-size: 0.68rem;
+      font-weight: 300;
+      color: var(--text-sub);
+      line-height: 1.9;
+      letter-spacing: 0.03em;
+    }
+
+    /* ━━━ フッター ━━━ */
+    .footer {
+      text-align: center;
+      margin-top: 32px;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.6rem;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      color: var(--text-sub);
+      text-transform: uppercase;
+      opacity: 0.7;
+    }
+
+    /* ━━━ レスポンシブ ━━━ */
+    @media (max-width: 900px) {
+      .ring { width: 150px; height: 150px; }
+      .flow-arrow svg { width: 24px; }
+      .flow-arrow { padding: 0 6px; }
+      .main-card { padding: 40px 24px 36px; }
+    }
+
+    @media (max-width: 680px) {
+      .flow-grid {
+        flex-wrap: wrap;
+        gap: 20px 0;
+        justify-content: center;
+      }
+      .ring { width: 148px; height: 148px; }
+      .flow-arrow { display: none; }
+      .bottom-grid { grid-template-columns: 1fr; }
+      .main-card { padding: 36px 20px 32px; border-radius: 20px; }
+    }
+
+    @media (max-width: 400px) {
+      .ring { width: 130px; height: 130px; }
+    }
+  </style>
+</head>
+<body>
+
+<main class="main-card">
+
+  <!-- ヘッダー -->
+  <header class="header">
+    <h1 class="header-title">スケジュール調整自動化ツール</h1>
+    <p class="header-sub">Schedule Automation System</p>
+  </header>
+
+  <!-- 4カード -->
+  <div class="flow-grid">
+
+    <!-- 01 取得する -->
+    <div class="item">
+      <div class="ring ring-01">
+        <div class="ring-inner">
+          <span class="c-num">01</span>
+          <svg class="icon-svg" viewBox="0 0 56 56" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="28" cy="18" r="9" />
+            <path d="M19 18 C10 18 8 30 8 36 H48 C48 30 46 18 37 18" />
+            <line x1="28" y1="30" x2="28" y2="44" />
+            <polyline points="22,38 28,44 34,38" />
+          </svg>
+          <span class="c-title">取得する</span>
+          <div class="c-divider"></div>
+          <p class="c-desc">notify.py が毎日22:00<br>APIから予定を取得</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 矢印 01→02 -->
+    <div class="flow-arrow">
+      <svg viewBox="0 0 32 16" fill="none">
+        <line x1="0" y1="8" x2="20" y2="8" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round"/>
+        <polyline points="14,3 21,8 14,13" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </div>
+
+    <!-- 02 判定する -->
+    <div class="item">
+      <div class="ring ring-02">
+        <div class="ring-inner">
+          <span class="c-num">02</span>
+          <svg class="icon-svg" viewBox="0 0 56 56" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="8" y="38" width="8" height="10" rx="1.5" />
+            <rect x="22" y="28" width="8" height="20" rx="1.5" />
+            <rect x="36" y="18" width="8" height="30" rx="1.5" />
+            <polyline points="12,22 24,14 36,20 48,10" />
+            <circle cx="48" cy="10" r="3" />
+          </svg>
+          <span class="c-title">判定する</span>
+          <div class="c-divider"></div>
+          <p class="c-desc">予定データを解析<br>通知対象を自動抽出</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 矢印 02→03 -->
+    <div class="flow-arrow">
+      <svg viewBox="0 0 32 16" fill="none">
+        <line x1="0" y1="8" x2="20" y2="8" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round"/>
+        <polyline points="14,3 21,8 14,13" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </div>
+
+    <!-- 03 通知する -->
+    <div class="item">
+      <div class="ring ring-03">
+        <div class="ring-inner">
+          <span class="c-num">03</span>
+          <svg class="icon-svg" viewBox="0 0 56 56" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M28 8 C18 8 14 16 14 24 L12 38 H44 L42 24 C42 16 38 8 28 8 Z" />
+            <line x1="24" y1="38" x2="24" y2="42" />
+            <line x1="32" y1="38" x2="32" y2="42" />
+            <path d="M24 42 Q28 46 32 42" />
+            <circle cx="42" cy="12" r="5" fill="currentColor" opacity="0.25" />
+            <circle cx="42" cy="12" r="3" />
+          </svg>
+          <span class="c-title">通知する</span>
+          <div class="c-divider"></div>
+          <p class="c-desc">LINE Messaging APIへ<br>担当者へ自動通知</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 矢印 03→04 -->
+    <div class="flow-arrow">
+      <svg viewBox="0 0 32 16" fill="none">
+        <line x1="0" y1="8" x2="20" y2="8" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round"/>
+        <polyline points="14,3 21,8 14,13" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </div>
+
+    <!-- 04 管理する -->
+    <div class="item">
+      <div class="ring ring-04">
+        <div class="ring-inner">
+          <span class="c-num">04</span>
+          <svg class="icon-svg" viewBox="0 0 56 56" fill="none" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M40 16 A16 16 0 0 1 44 28" />
+            <polyline points="36,12 40,16 44,12" />
+            <path d="M16 40 A16 16 0 0 1 12 28" />
+            <polyline points="20,44 16,40 12,44" />
+            <path d="M14 20 A16 16 0 0 1 28 12" />
+            <path d="M42 36 A16 16 0 0 1 28 44" />
+            <circle cx="28" cy="28" r="5" />
+          </svg>
+          <span class="c-title">管理する</span>
+          <div class="c-divider"></div>
+          <p class="c-desc">毎日自動で繰り返し<br>人手不要で継続稼働</p>
+        </div>
+      </div>
+    </div>
+
+  </div><!-- /flow-grid -->
+
+  <!-- 区切り線 -->
+  <div class="divider"></div>
+
+  <!-- 下部情報 -->
+  <div class="bottom-grid">
+
+    <!-- 実行設定 -->
+    <div class="inset-panel">
+      <p class="panel-eyebrow">Configuration</p>
+      <div class="config-rows">
+        <div class="config-row">
+          <span class="config-key">Script</span>
+          <span class="config-val">notify.py</span>
+        </div>
+        <div class="config-row">
+          <span class="config-key">Trigger</span>
+          <span class="config-val">毎日 22:00（cron / launchd）</span>
+        </div>
+        <div class="config-row">
+          <span class="config-key">Source</span>
+          <span class="config-val">API → JSON 取得</span>
+        </div>
+        <div class="config-row">
+          <span class="config-key">Output</span>
+          <span class="config-val">LINE Messaging API</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- notify.py 説明 -->
+    <div class="inset-panel">
+      <p class="panel-eyebrow">About notify.py</p>
+      <div class="notify-panel">
+        <div class="notify-icon-circle">
+          <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/>
+            <path d="M9 9h.01M12 9h.01M15 9h.01M9 13h.01M12 13h.01M15 13h.01"/>
+          </svg>
+        </div>
+        <div>
+          <p class="notify-title">notify.py（ノティファイ）</p>
+          <p class="notify-body">毎日22時に起動し、APIから予定情報を取得してLINEへ通知する自動処理プログラムです。Flask などのサーバーは不要で、cron または launchd でスケジュール実行します。</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <footer class="footer">Automation · Fetch · Analyze · Notify · Manage</footer>
+
+</main>
+
+</body>
+</html>

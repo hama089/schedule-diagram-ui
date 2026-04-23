@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>スケジュール自動化ツール</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #e8eaf0;
+      --shadow-dark: #c5c7cf;
+      --shadow-light: #ffffff;
+      --card-size: 200px;
+      --gap: 60px;
+      --accent-1: #7c9cbf;
+      --accent-2: #9bb0c1;
+      --accent-3: #a8b8c8;
+      --accent-4: #849ab0;
+    }
+
+    body {
+      background-color: var(--bg);
+      font-family: 'Noto Sans JP', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 24px;
+      color: #4a5568;
+    }
+
+    /* ── タイトル ── */
+    .page-title {
+      font-size: clamp(1.4rem, 4vw, 2rem);
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: #3d4a5c;
+      margin-bottom: 8px;
+      text-align: center;
+    }
+
+    .page-subtitle {
+      font-size: 0.8rem;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      color: #7a8899;
+      margin-bottom: 56px;
+      text-align: center;
+    }
+
+    /* ── ダイアグラム全体 ── */
+    .diagram-wrapper {
+      position: relative;
+      display: inline-block;
+    }
+
+    .diagram-grid {
+      display: grid;
+      grid-template-columns: var(--card-size) var(--card-size);
+      grid-template-rows: var(--card-size) var(--card-size);
+      gap: var(--gap);
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ── 接続線 SVG ── */
+    .connector-svg {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .connector-line {
+      stroke: #b8bfcc;
+      stroke-width: 1.5;
+      stroke-dasharray: 6 4;
+      stroke-linecap: round;
+      fill: none;
+      opacity: 0.7;
+    }
+
+    /* ── 円形カード ── */
+    .card {
+      width: var(--card-size);
+      height: var(--card-size);
+      border-radius: 50%;
+      background: var(--bg);
+      box-shadow:
+        10px 10px 28px var(--shadow-dark),
+        -10px -10px 28px var(--shadow-light);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: default;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      user-select: none;
+    }
+
+    .card:hover {
+      transform: translateY(-8px);
+      box-shadow:
+        14px 18px 36px var(--shadow-dark),
+        -10px -10px 28px var(--shadow-light);
+    }
+
+    /* カラーリング（内側リング） */
+    .card::before {
+      content: '';
+      position: absolute;
+      inset: 10px;
+      border-radius: 50%;
+      border: 1.5px solid transparent;
+      background:
+        linear-gradient(var(--bg), var(--bg)) padding-box,
+        linear-gradient(135deg, rgba(255,255,255,0.6), rgba(180,190,210,0.3)) border-box;
+    }
+
+    /* アイコン */
+    .card-icon {
+      font-size: 2rem;
+      line-height: 1;
+      margin-bottom: 8px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* タイトル */
+    .card-title {
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      color: #3d4a5c;
+      position: relative;
+      z-index: 1;
+      margin-bottom: 6px;
+    }
+
+    /* 仕切り線 */
+    .card-divider {
+      width: 28px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, #aab0be, transparent);
+      margin-bottom: 7px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* 説明 */
+    .card-desc {
+      font-size: 0.62rem;
+      font-weight: 300;
+      color: #7a8899;
+      letter-spacing: 0.04em;
+      text-align: center;
+      line-height: 1.6;
+      position: relative;
+      z-index: 1;
+      padding: 0 20px;
+    }
+
+    /* ── フロー矢印バッジ ── */
+    .flow-badge {
+      position: absolute;
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      background: var(--bg);
+      box-shadow:
+        4px 4px 10px var(--shadow-dark),
+        -4px -4px 10px var(--shadow-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.55rem;
+      color: #8a9ab0;
+      z-index: 2;
+      letter-spacing: 0;
+    }
+
+    /* バッジ位置 — カード間の中点 */
+    /* 上段中央（横接続） */
+    .badge-h-top {
+      top: calc(var(--card-size) / 2 - 13px);
+      left: calc(var(--card-size) + var(--gap) / 2 - 13px);
+    }
+    /* 下段中央（横接続） */
+    .badge-h-bottom {
+      top: calc(var(--card-size) + var(--gap) + var(--card-size) / 2 - 13px);
+      left: calc(var(--card-size) + var(--gap) / 2 - 13px);
+    }
+    /* 左列中央（縦接続） */
+    .badge-v-left {
+      top: calc(var(--card-size) + var(--gap) / 2 - 13px);
+      left: calc(var(--card-size) / 2 - 13px);
+    }
+    /* 右列中央（縦接続） */
+    .badge-v-right {
+      top: calc(var(--card-size) + var(--gap) / 2 - 13px);
+      left: calc(var(--card-size) + var(--gap) + var(--card-size) / 2 - 13px);
+    }
+
+    /* ── フッター ── */
+    .page-footer {
+      margin-top: 52px;
+      text-align: center;
+    }
+
+    .footer-text {
+      font-size: 0.75rem;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      color: #8a9ab0;
+      line-height: 1.8;
+    }
+
+    .footer-dot {
+      display: inline-block;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #aab5c5;
+      margin: 0 8px;
+      vertical-align: middle;
+    }
+
+    /* ── スマホ対応 ── */
+    @media (max-width: 520px) {
+      :root {
+        --card-size: 148px;
+        --gap: 36px;
+      }
+
+      .card-icon {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+      }
+
+      .card-title {
+        font-size: 0.82rem;
+      }
+
+      .card-desc {
+        font-size: 0.54rem;
+        padding: 0 14px;
+      }
+
+      .page-title {
+        margin-bottom: 6px;
+      }
+
+      .page-subtitle {
+        margin-bottom: 40px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <h1 class="page-title">スケジュール自動化ツール</h1>
+  <p class="page-subtitle">Schedule Automation System</p>
+
+  <div class="diagram-wrapper">
+
+    <!-- 接続線 SVG（カードサイズ・ギャップに合わせて座標計算） -->
+    <!--
+      card-size = 200, gap = 60
+      総幅 = 200 + 60 + 200 = 460
+      総高 = 200 + 60 + 200 = 460
+      各円中心:
+        左上(収集): (100, 100)
+        右上(判定): (360, 100)
+        左下(通知): (100, 360)
+        右下(実行): (360, 360)
+    -->
+    <svg class="connector-svg" viewBox="0 0 460 460" preserveAspectRatio="xMidYMid meet">
+      <!-- 横: 収集 → 判定 -->
+      <line class="connector-line" x1="100" y1="100" x2="360" y2="100" />
+      <!-- 縦: 収集 → 通知 -->
+      <line class="connector-line" x1="100" y1="100" x2="100" y2="360" />
+      <!-- 横: 通知 → 実行 -->
+      <line class="connector-line" x1="100" y1="360" x2="360" y2="360" />
+      <!-- 縦: 判定 → 実行 -->
+      <line class="connector-line" x1="360" y1="100" x2="360" y2="360" />
+    </svg>
+
+    <!-- フロー矢印バッジ -->
+    <div class="flow-badge badge-h-top">→</div>
+    <div class="flow-badge badge-v-left">↓</div>
+    <div class="flow-badge badge-v-right">↓</div>
+    <div class="flow-badge badge-h-bottom">→</div>
+
+    <!-- カードグリッド -->
+    <div class="diagram-grid">
+
+      <!-- 1. 収集する -->
+      <div class="card">
+        <span class="card-icon">📥</span>
+        <span class="card-title">収集する</span>
+        <div class="card-divider"></div>
+        <p class="card-desc">フォーム・カレンダー<br>メール取得</p>
+      </div>
+
+      <!-- 2. 判定する -->
+      <div class="card">
+        <span class="card-icon">⚡</span>
+        <span class="card-title">判定する</span>
+        <div class="card-divider"></div>
+        <p class="card-desc">条件一致・期限判定<br>自動分岐</p>
+      </div>
+
+      <!-- 3. 通知する -->
+      <div class="card">
+        <span class="card-icon">🔔</span>
+        <span class="card-title">通知する</span>
+        <div class="card-divider"></div>
+        <p class="card-desc">LINE・Slack・メール<br>へ自動通知</p>
+      </div>
+
+      <!-- 4. 実行する -->
+      <div class="card">
+        <span class="card-icon">▶</span>
+        <span class="card-title">実行する</span>
+        <div class="card-divider"></div>
+        <p class="card-desc">返信・登録・共有を<br>自動実行</p>
+      </div>
+
+    </div><!-- /diagram-grid -->
+  </div><!-- /diagram-wrapper -->
+
+  <footer class="page-footer">
+    <p class="footer-text">
+      収集
+      <span class="footer-dot"></span>
+      判定
+      <span class="footer-dot"></span>
+      実行
+      <span class="footer-dot"></span>
+      通知
+      <span class="footer-dot"></span>
+      すべてを自動化する
+    </p>
+  </footer>
+
+</body>
+</html>
