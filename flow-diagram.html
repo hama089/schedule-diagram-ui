@@ -232,6 +232,46 @@
       letter-spacing: 0.02em;
     }
 
+    /* ━━━ テックスタックバッジ ━━━ */
+    .stack-tags {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      margin-top: 10px;
+    }
+
+    .stack-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 20px;
+      background: var(--bg);
+      box-shadow: 3px 3px 7px var(--sd), -3px -3px 7px var(--sl);
+      font-family: 'Inter', monospace;
+      font-size: 0.55rem;
+      font-weight: 600;
+      color: var(--sub);
+      letter-spacing: 0.05em;
+      white-space: nowrap;
+    }
+
+    .stack-tag .tag-dot {
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    .tag-line  { color: #5ec8dc; }
+    .tag-py    { color: #ae88e4; }
+    .tag-file  { color: #e8a880; }
+
+    .dot-line  { background: #5ec8dc; }
+    .dot-py    { background: #ae88e4; }
+    .dot-file  { background: #e8a880; }
+
     /* ━━━ 再調整フロー ━━━ */
     .readjust-flow {
       display: flex;
@@ -474,6 +514,11 @@
             <div class="n-div"></div>
             <p class="n-desc">ツールが<br>回答を集約</p>
           </div>
+        </div>
+        <div class="stack-tags">
+          <span class="stack-tag tag-line"><span class="tag-dot dot-line"></span>LINE Messaging API</span>
+          <span class="stack-tag tag-py"><span class="tag-dot dot-py"></span>webhook_server.py</span>
+          <span class="stack-tag tag-file"><span class="tag-dot dot-file"></span>schedule.txt</span>
         </div>
       </div>
 
