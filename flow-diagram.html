@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>スケジュール調整自動化 — フロー図</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;700&family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg: #e4e7f0;
+      --sd: #bcc0cc;
+      --sl: #ffffff;
+      --text: #2e3346;
+      --sub: #7a82a0;
+      --c1: #5ec8dc;  /* teal */
+      --c2: #7898e8;  /* blue */
+      --c3: #ae88e4;  /* purple */
+      --c4: #5ab89a;  /* green */
+      --c5: #e8a880;  /* orange */
+    }
+
+    body {
+      background: #d8dbe8;
+      font-family: 'Noto Sans JP', 'Inter', sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      padding: 40px 20px 60px;
+      display: flex;
+      justify-content: center;
+    }
+
+    /* ━━━ メインラッパー ━━━ */
+    .page {
+      width: 100%;
+      max-width: 1040px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* ━━━ パネル共通 ━━━ */
+    .panel {
+      background: var(--bg);
+      border-radius: 24px;
+      box-shadow: 14px 14px 36px var(--sd), -14px -14px 36px var(--sl);
+      padding: 36px 40px;
+    }
+
+    /* ━━━ ヘッダー ━━━ */
+    .header {
+      text-align: center;
+      padding: 40px 40px 36px;
+    }
+
+    .header-eyebrow {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.3em;
+      color: var(--sub);
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+
+    .header-title {
+      font-size: clamp(1.2rem, 3vw, 1.8rem);
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      color: var(--text);
+      margin-bottom: 8px;
+    }
+
+    .header-sub {
+      font-size: 0.8rem;
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      color: var(--sub);
+    }
+
+    /* ━━━ セクションラベル ━━━ */
+    .section-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .section-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 5px 14px;
+      border-radius: 20px;
+      background: var(--bg);
+      box-shadow: 3px 3px 8px var(--sd), -3px -3px 8px var(--sl);
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      white-space: nowrap;
+    }
+
+    .badge-teal  { color: var(--c1); }
+    .badge-blue  { color: var(--c2); }
+    .badge-purple{ color: var(--c3); }
+    .badge-green { color: var(--c4); }
+    .badge-orange{ color: var(--c5); }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: linear-gradient(90deg, #b8bcc8, transparent);
+    }
+
+    /* ━━━ フロー行（横並び）━━━ */
+    .flow-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: nowrap;
+      gap: 0;
+    }
+
+    /* ━━━ 矢印 ━━━ */
+    .arr {
+      flex-shrink: 0;
+      padding: 0 6px;
+      display: flex;
+      align-items: center;
+    }
+    .arr svg {
+      width: 22px;
+      height: 14px;
+      overflow: visible;
+    }
+
+    /* ━━━ 丸カード ━━━ */
+    .node {
+      flex-shrink: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .ring {
+      border-radius: 50%;
+      padding: 6px;
+      transition: transform 0.3s ease, filter 0.3s ease;
+      cursor: default;
+    }
+    .ring:hover {
+      transform: translateY(-7px);
+      filter: drop-shadow(0 12px 20px rgba(0,0,0,0.15));
+    }
+
+    .ring-inner {
+      border-radius: 50%;
+      background: var(--bg);
+      box-shadow: inset 5px 5px 14px var(--sd), inset -5px -5px 14px var(--sl);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 14px 10px;
+    }
+
+    /* サイズ: large */
+    .ring-lg { width: 148px; height: 148px; }
+    .ring-lg .ring-inner { width: 100%; height: 100%; }
+
+    /* サイズ: medium */
+    .ring-md { width: 120px; height: 120px; }
+    .ring-md .ring-inner { width: 100%; height: 100%; }
+
+    /* グラデーションリング */
+    .ring-teal   { background: conic-gradient(from 120deg, #b8edf5, #7dd8e8, #d8f6fc, #7dd8e8, #b8edf5); }
+    .ring-blue   { background: conic-gradient(from 120deg, #c4d4ff, #96b0f4, #dde8ff, #96b0f4, #c4d4ff); }
+    .ring-purple { background: conic-gradient(from 120deg, #e0c8ff, #c098f0, #eeddff, #c098f0, #e0c8ff); }
+    .ring-green  { background: conic-gradient(from 120deg, #b8e8d8, #7dcca8, #d4f4e8, #7dcca8, #b8e8d8); }
+    .ring-orange { background: conic-gradient(from 120deg, #fce4b8, #f0b898, #fdf2d8, #f0b898, #fce4b8); }
+
+    /* アイコン */
+    .n-icon { font-size: 1.3rem; margin-bottom: 4px; }
+    .n-icon-md { font-size: 1.1rem; margin-bottom: 3px; }
+
+    /* ステップ番号 */
+    .n-num {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      margin-bottom: 3px;
+    }
+    .ring-teal   .n-num { color: var(--c1); }
+    .ring-blue   .n-num { color: var(--c2); }
+    .ring-purple .n-num { color: var(--c3); }
+    .ring-green  .n-num { color: var(--c4); }
+    .ring-orange .n-num { color: var(--c5); }
+
+    /* タイトル */
+    .n-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .n-title-sm {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+
+    .n-div {
+      width: 22px; height: 1px;
+      background: linear-gradient(90deg, transparent, #aab2c8, transparent);
+      margin-bottom: 4px; flex-shrink: 0;
+    }
+
+    /* 説明 */
+    .n-desc {
+      font-size: 0.54rem;
+      font-weight: 300;
+      color: var(--sub);
+      line-height: 1.65;
+      letter-spacing: 0.02em;
+    }
+
+    /* ━━━ 再調整フロー ━━━ */
+    .readjust-flow {
+      display: flex;
+      align-items: stretch;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .readjust-node {
+      flex: 1;
+      min-width: 140px;
+      background: var(--bg);
+      border-radius: 16px;
+      box-shadow: 6px 6px 16px var(--sd), -6px -6px 16px var(--sl);
+      padding: 18px 16px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      gap: 6px;
+      transition: transform 0.3s ease;
+      cursor: default;
+    }
+    .readjust-node:hover { transform: translateY(-5px); }
+
+    .rn-icon { font-size: 1.4rem; }
+    .rn-num {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+    }
+    .rn-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      color: var(--text);
+    }
+    .rn-div {
+      width: 28px; height: 1px;
+      background: linear-gradient(90deg, transparent, #aab2c8, transparent);
+      flex-shrink: 0;
+    }
+    .rn-desc {
+      font-size: 0.58rem;
+      font-weight: 300;
+      color: var(--sub);
+      line-height: 1.7;
+    }
+    .rn-check {
+      font-size: 0.56rem;
+      color: var(--sub);
+      line-height: 1.8;
+      text-align: left;
+      width: 100%;
+      padding-left: 4px;
+    }
+    .rn-check li { list-style: none; }
+    .rn-check li::before { content: "✓ "; color: var(--c3); font-weight: 600; }
+
+    .rn-purple { border-top: 2px solid rgba(174,136,228,0.35); }
+    .rn-teal   { border-top: 2px solid rgba(94,200,220,0.35); }
+    .rn-green  { border-top: 2px solid rgba(90,184,154,0.35); }
+    .rn-num-purple { color: var(--c3); }
+    .rn-num-teal   { color: var(--c1); }
+    .rn-num-green  { color: var(--c4); }
+
+    .readjust-arr {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+      padding-top: 0;
+      align-self: center;
+    }
+
+    /* ━━━ まとめステップ ━━━ */
+    .summary-row {
+      display: flex;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 0;
+      justify-content: center;
+    }
+
+    .summary-step {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .summary-pill {
+      background: var(--bg);
+      border-radius: 12px;
+      box-shadow: inset 3px 3px 8px var(--sd), inset -3px -3px 8px var(--sl);
+      padding: 10px 14px;
+      text-align: center;
+      min-width: 100px;
+    }
+
+    .sp-num {
+      font-family: 'Inter', sans-serif;
+      font-size: 0.5rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      color: var(--c2);
+      margin-bottom: 3px;
+    }
+    .sp-label {
+      font-size: 0.6rem;
+      font-weight: 500;
+      color: var(--text);
+      letter-spacing: 0.04em;
+      line-height: 1.5;
+    }
+    .sp-sub {
+      font-size: 0.52rem;
+      font-weight: 300;
+      color: var(--sub);
+      line-height: 1.5;
+    }
+
+    .summary-arr {
+      flex-shrink: 0;
+      padding: 0 4px;
+      display: flex;
+      align-items: center;
+    }
+
+    /* ━━━ オプショングリッド ━━━ */
+    .options-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .opt-card {
+      background: var(--bg);
+      border-radius: 14px;
+      box-shadow: 5px 5px 14px var(--sd), -5px -5px 14px var(--sl);
+      padding: 16px 14px;
+      text-align: center;
+      transition: transform 0.3s ease;
+      cursor: default;
+    }
+    .opt-card:hover { transform: translateY(-4px); }
+
+    .opt-icon { font-size: 1.2rem; margin-bottom: 6px; }
+    .opt-title {
+      font-size: 0.7rem;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: 0.06em;
+      margin-bottom: 5px;
+    }
+    .opt-desc {
+      font-size: 0.57rem;
+      font-weight: 300;
+      color: var(--sub);
+      line-height: 1.65;
+    }
+
+    /* ━━━ レスポンシブ ━━━ */
+    @media (max-width: 860px) {
+      .ring-lg { width: 120px; height: 120px; }
+      .ring-md { width: 100px; height: 100px; }
+      .n-icon { font-size: 1.1rem; }
+      .options-grid { grid-template-columns: repeat(2, 1fr); }
+      .panel { padding: 28px 24px; }
+    }
+
+    @media (max-width: 620px) {
+      .flow-row { flex-wrap: wrap; gap: 16px; justify-content: center; }
+      .arr { display: none; }
+      .readjust-flow { flex-direction: column; }
+      .readjust-arr { display: none; }
+      .summary-row { gap: 8px; }
+      .summary-arr { display: none; }
+      .options-grid { grid-template-columns: repeat(2, 1fr); }
+      .panel { padding: 24px 18px; border-radius: 18px; }
+    }
+  </style>
+</head>
+<body>
+<div class="page">
+
+  <!-- ヘッダー -->
+  <div class="panel header">
+    <p class="header-eyebrow">Schedule Automation</p>
+    <h1 class="header-title">スケジュール調整自動化ツール</h1>
+    <p class="header-sub">URLを送るだけで、全員の都合を自動集計・決定・カレンダー登録まで</p>
+  </div>
+
+  <!-- ① メインフロー -->
+  <div class="panel">
+    <div class="section-head">
+      <span class="section-badge badge-teal">メインフロー</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="flow-row">
+
+      <!-- ① あなた -->
+      <div class="node">
+        <div class="ring ring-lg ring-teal">
+          <div class="ring-inner">
+            <span class="n-num">① SEND</span>
+            <span class="n-icon">💻</span>
+            <span class="n-title">URLを送る</span>
+            <div class="n-div"></div>
+            <p class="n-desc">あなたが<br>参加者へ共有</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="arr"><svg viewBox="0 0 22 14" fill="none"><line x1="0" y1="7" x2="17" y2="7" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round"/><polyline points="12,3 18,7 12,11" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+      <!-- ② 参加者 -->
+      <div class="node">
+        <div class="ring ring-lg ring-blue">
+          <div class="ring-inner">
+            <span class="n-num">② ANSWER</span>
+            <span class="n-icon">👥</span>
+            <span class="n-title">回答する</span>
+            <div class="n-div"></div>
+            <p class="n-desc">参加者が<br>希望時間を入力</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="arr"><svg viewBox="0 0 22 14" fill="none"><line x1="0" y1="7" x2="17" y2="7" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round"/><polyline points="12,3 18,7 12,11" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+      <!-- ③ 自動集計 -->
+      <div class="node">
+        <div class="ring ring-lg ring-purple">
+          <div class="ring-inner">
+            <span class="n-num">③ COLLECT</span>
+            <span class="n-icon">⚡</span>
+            <span class="n-title">自動集計</span>
+            <div class="n-div"></div>
+            <p class="n-desc">ツールが<br>回答を集約</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="arr"><svg viewBox="0 0 22 14" fill="none"><line x1="0" y1="7" x2="17" y2="7" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round"/><polyline points="12,3 18,7 12,11" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+      <!-- ④ 決定 -->
+      <div class="node">
+        <div class="ring ring-lg ring-green">
+          <div class="ring-inner">
+            <span class="n-num">④ DECIDE</span>
+            <span class="n-icon">✅</span>
+            <span class="n-title">時間を決定</span>
+            <div class="n-div"></div>
+            <p class="n-desc">全員OK時間<br>を自動選出</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="arr"><svg viewBox="0 0 22 14" fill="none"><line x1="0" y1="7" x2="17" y2="7" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round"/><polyline points="12,3 18,7 12,11" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+      <!-- ⑤ カレンダー -->
+      <div class="node">
+        <div class="ring ring-lg ring-orange">
+          <div class="ring-inner">
+            <span class="n-num">⑤ REGISTER</span>
+            <span class="n-icon">📅</span>
+            <span class="n-title">カレンダー登録</span>
+            <div class="n-div"></div>
+            <p class="n-desc">全員の予定に<br>自動追加</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ⑥⑦ 再調整フロー -->
+  <div class="panel">
+    <div class="section-head">
+      <span class="section-badge badge-purple">自動再調整フロー</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="readjust-flow">
+
+      <!-- ⑥ 変更連絡 -->
+      <div class="readjust-node rn-purple">
+        <span class="rn-icon">💬</span>
+        <span class="rn-num rn-num-purple">⑥ CHANGE</span>
+        <span class="rn-title">変更の連絡</span>
+        <div class="rn-div"></div>
+        <p class="rn-desc">参加者から<br>「日程を変更したい」<br>と連絡が届く</p>
+      </div>
+
+      <div class="readjust-arr"><svg viewBox="0 0 22 14" fill="none"><line x1="0" y1="7" x2="17" y2="7" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round"/><polyline points="12,3 18,7 12,11" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+      <!-- 自動再調整 -->
+      <div class="readjust-node rn-teal">
+        <span class="rn-icon">🤖</span>
+        <span class="rn-num rn-num-teal">AUTO</span>
+        <span class="rn-title">ツールが自動再調整</span>
+        <div class="rn-div"></div>
+        <ul class="rn-check">
+          <li>空き時間を再取得</li>
+          <li>全員の希望を再計算</li>
+          <li>最適な候補を再提案</li>
+        </ul>
+      </div>
+
+      <div class="readjust-arr"><svg viewBox="0 0 22 14" fill="none"><line x1="0" y1="7" x2="17" y2="7" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round"/><polyline points="12,3 18,7 12,11" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+      <!-- ⑦ 新候補提案 -->
+      <div class="readjust-node rn-purple">
+        <span class="rn-icon">📋</span>
+        <span class="rn-num rn-num-purple">⑦ PROPOSE</span>
+        <span class="rn-title">新しい候補を提案</span>
+        <div class="rn-div"></div>
+        <p class="rn-desc">新候補を<br>参加者へ通知<br>URLで確認</p>
+      </div>
+
+      <div class="readjust-arr"><svg viewBox="0 0 22 14" fill="none"><line x1="0" y1="7" x2="17" y2="7" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round"/><polyline points="12,3 18,7 12,11" stroke="#a8b2c8" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+      <!-- カレンダー更新 -->
+      <div class="readjust-node rn-green">
+        <span class="rn-icon">📅</span>
+        <span class="rn-num rn-num-green">UPDATE</span>
+        <span class="rn-title">カレンダーに自動更新</span>
+        <div class="rn-div"></div>
+        <p class="rn-desc">決定した日程で<br>カレンダーを<br>自動書き換え</p>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- 自動再調整まとめ -->
+  <div class="panel">
+    <div class="section-head">
+      <span class="section-badge badge-blue">自動再調整の流れ（まとめ）</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="summary-row">
+
+      <div class="summary-step">
+        <div class="summary-pill">
+          <p class="sp-num">STEP 1</p>
+          <p class="sp-label">変更の連絡を受信</p>
+          <p class="sp-sub">メール / チャット / 返信</p>
+        </div>
+      </div>
+
+      <div class="summary-arr"><svg viewBox="0 0 22 14" fill="none"><line x1="0" y1="7" x2="17" y2="7" stroke="#a8b2c8" stroke-width="2" stroke-linecap="round"/><polyline points="12,3 18,7 12,11" stroke="#a8b2c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+      <div class="summary-step">
+        <div class="summary-pill">
+          <p class="sp-num">STEP 2</p>
+          <p class="sp-label">ツールが変更を検知</p>
+          <p class="sp-sub">自動トリガー</p>
+        </div>
+      </div>
+
+      <div class="summary-arr"><svg viewBox="0 0 22 14" fill="none"><line x1="0" y1="7" x2="17" y2="7" stroke="#a8b2c8" stroke-width="2" stroke-linecap="round"/><polyline points="12,3 18,7 12,11" stroke="#a8b2c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+      <div class="summary-step">
+        <div class="summary-pill">
+          <p class="sp-num">STEP 3</p>
+          <p class="sp-label">空き時間を再取得</p>
+          <p class="sp-sub">+ 皆の希望を再計算</p>
+        </div>
+      </div>
+
+      <div class="summary-arr"><svg viewBox="0 0 22 14" fill="none"><line x1="0" y1="7" x2="17" y2="7" stroke="#a8b2c8" stroke-width="2" stroke-linecap="round"/><polyline points="12,3 18,7 12,11" stroke="#a8b2c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+      <div class="summary-step">
+        <div class="summary-pill">
+          <p class="sp-num">STEP 4</p>
+          <p class="sp-label">最適な候補を提示</p>
+          <p class="sp-sub">全員いける時間を再探索</p>
+        </div>
+      </div>
+
+      <div class="summary-arr"><svg viewBox="0 0 22 14" fill="none"><line x1="0" y1="7" x2="17" y2="7" stroke="#a8b2c8" stroke-width="2" stroke-linecap="round"/><polyline points="12,3 18,7 12,11" stroke="#a8b2c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+      <div class="summary-step">
+        <div class="summary-pill">
+          <p class="sp-num">STEP 5</p>
+          <p class="sp-label">参加者に自動通知</p>
+          <p class="sp-sub">URLで新候補を案内</p>
+        </div>
+      </div>
+
+      <div class="summary-arr"><svg viewBox="0 0 22 14" fill="none"><line x1="0" y1="7" x2="17" y2="7" stroke="#a8b2c8" stroke-width="2" stroke-linecap="round"/><polyline points="12,3 18,7 12,11" stroke="#a8b2c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></div>
+
+      <div class="summary-step">
+        <div class="summary-pill">
+          <p class="sp-num">STEP 6</p>
+          <p class="sp-label">カレンダーに自動更新</p>
+          <p class="sp-sub">決定すれば即反映</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- オプション -->
+  <div class="panel">
+    <div class="section-head">
+      <span class="section-badge badge-orange">さらに便利にできること（オプション）</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="options-grid">
+      <div class="opt-card">
+        <div class="opt-icon">🔔</div>
+        <p class="opt-title">リマインド機能</p>
+        <p class="opt-desc">未回答の人へ<br>自動リマインド送信</p>
+      </div>
+      <div class="opt-card">
+        <div class="opt-icon">⭐</div>
+        <p class="opt-title">優先順位設定</p>
+        <p class="opt-desc">あなたの希望を<br>優先して自動調整</p>
+      </div>
+      <div class="opt-card">
+        <div class="opt-icon">📋</div>
+        <p class="opt-title">複数案提示</p>
+        <p class="opt-desc">第2・第3候補も<br>自動で提示</p>
+      </div>
+      <div class="opt-card">
+        <div class="opt-icon">❌</div>
+        <p class="opt-title">キャンセル対応</p>
+        <p class="opt-desc">予定をキャンセルし<br>自動で再調整</p>
+      </div>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
