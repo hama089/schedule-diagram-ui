@@ -118,7 +118,7 @@
     /* ━━━ フロー行（横並び）━━━ */
     .flow-row {
       display: flex;
-      align-items: center;
+      align-items: flex-start;
       justify-content: center;
       flex-wrap: nowrap;
       gap: 0;
@@ -130,6 +130,8 @@
       padding: 0 6px;
       display: flex;
       align-items: center;
+      /* ring-lg = 148px, 矢印の中心を円の中央に合わせる */
+      margin-top: calc((148px - 14px) / 2);
     }
     .arr svg {
       width: 22px;
@@ -267,10 +269,12 @@
     .tag-line  { color: #5ec8dc; }
     .tag-py    { color: #ae88e4; }
     .tag-file  { color: #e8a880; }
+    .tag-ngrok { color: #7ec8a0; }
 
     .dot-line  { background: #5ec8dc; }
     .dot-py    { background: #ae88e4; }
     .dot-file  { background: #e8a880; }
+    .dot-ngrok { background: #7ec8a0; }
 
     /* ━━━ 再調整フロー ━━━ */
     .readjust-flow {
@@ -487,7 +491,7 @@
         </div>
         <div class="stack-tags">
           <span class="stack-tag tag-py"><span class="tag-dot dot-py"></span>startup.py</span>
-          <span class="stack-tag tag-line"><span class="tag-dot dot-line"></span>ngrok</span>
+          <span class="stack-tag tag-ngrok"><span class="tag-dot dot-ngrok"></span>ngrok</span>
           <span class="stack-tag tag-file"><span class="tag-dot dot-file"></span>LINE Webhook設定</span>
         </div>
       </div>
@@ -507,7 +511,7 @@
         </div>
         <div class="stack-tags">
           <span class="stack-tag tag-line"><span class="tag-dot dot-line"></span>LINE Messaging API</span>
-          <span class="stack-tag tag-line"><span class="tag-dot dot-line"></span>ngrok トンネル</span>
+          <span class="stack-tag tag-ngrok"><span class="tag-dot dot-ngrok"></span>ngrok トンネル</span>
         </div>
       </div>
 
