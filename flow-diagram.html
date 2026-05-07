@@ -448,6 +448,194 @@
       line-height: 1.65;
     }
 
+    /* ━━━ 実際の画面 ━━━ */
+    .screen-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 20px;
+    }
+
+    .screen-card {
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 6px 6px 18px var(--sd), -4px -4px 12px var(--sl);
+      cursor: pointer;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      background: var(--bg);
+    }
+    .screen-card:hover {
+      transform: translateY(-5px);
+      box-shadow: 10px 14px 28px var(--sd), -4px -4px 12px var(--sl);
+    }
+
+    .screen-img-wrap {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .screen-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* 画像未設定時のプレースホルダー */
+    .screen-placeholder {
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(135deg, #2a2d3e 0%, #1e2130 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      font-family: 'Inter', monospace;
+    }
+
+    .ph-bar {
+      display: flex;
+      gap: 5px;
+      margin-bottom: 8px;
+    }
+    .ph-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+    }
+    .ph-dot-r { background: #e06c75; }
+    .ph-dot-y { background: #e5c07b; }
+    .ph-dot-g { background: #98c379; }
+
+    .ph-line {
+      height: 8px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.12);
+    }
+
+    .ph-lines {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      width: 72%;
+    }
+
+    .ph-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 4px 10px;
+      border-radius: 6px;
+      background: rgba(94,200,220,0.18);
+      font-size: 0.6rem;
+      color: #5ec8dc;
+      letter-spacing: 0.08em;
+      margin-top: 4px;
+    }
+
+    /* キャプション */
+    .screen-caption {
+      padding: 12px 14px;
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+    }
+
+    .caption-icon {
+      font-size: 0.75rem;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .caption-text {
+      font-size: 0.62rem;
+      font-weight: 400;
+      color: var(--sub);
+      line-height: 1.65;
+      letter-spacing: 0.03em;
+    }
+
+    /* ━━━ モーダル ━━━ */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(20, 22, 34, 0.82);
+      backdrop-filter: blur(6px);
+      z-index: 1000;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+    .modal-overlay.open { display: flex; }
+
+    .modal-box {
+      background: var(--bg);
+      border-radius: 20px;
+      box-shadow: 20px 20px 60px rgba(0,0,0,0.4), -10px -10px 30px rgba(255,255,255,0.1);
+      max-width: 860px;
+      width: 100%;
+      overflow: hidden;
+      animation: modalIn 0.25s ease;
+    }
+
+    @keyframes modalIn {
+      from { opacity: 0; transform: scale(0.94); }
+      to   { opacity: 1; transform: scale(1); }
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 18px;
+      border-bottom: 1px solid rgba(180,185,200,0.3);
+    }
+
+    .modal-title {
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--sub);
+    }
+
+    .modal-close {
+      width: 28px; height: 28px;
+      border-radius: 50%;
+      background: var(--bg);
+      box-shadow: 3px 3px 7px var(--sd), -3px -3px 7px var(--sl);
+      border: none;
+      cursor: pointer;
+      font-size: 0.75rem;
+      color: var(--sub);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+    .modal-close:hover { transform: scale(1.1); }
+
+    .modal-img-wrap {
+      width: 100%;
+      aspect-ratio: 16 / 10;
+      overflow: hidden;
+    }
+    .modal-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
+
+    .modal-caption {
+      padding: 14px 18px;
+      font-size: 0.68rem;
+      font-weight: 300;
+      color: var(--sub);
+      letter-spacing: 0.04em;
+      line-height: 1.7;
+    }
+
+    @media (max-width: 860px) {
+      .screen-grid { grid-template-columns: 1fr; }
+    }
+
     /* ━━━ 工夫したポイント ━━━ */
     .kufu-grid {
       display: grid;
@@ -812,6 +1000,167 @@
       </div>
     </div>
   </div>
+
+  <!-- 実際の画面 -->
+  <div class="panel">
+    <div class="section-head">
+      <span class="section-badge badge-green">実際の画面</span>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="screen-grid">
+
+      <!-- 画面①：LINE通知 -->
+      <div class="screen-card" onclick="openModal('modal-1')">
+        <div class="screen-img-wrap">
+          <!-- src="" に実際のスクリーンショットのパスを入れてください -->
+          <img src="" alt="LINE通知画面" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+          <div class="screen-placeholder" style="display:flex;">
+            <div class="ph-bar">
+              <div class="ph-dot ph-dot-r"></div>
+              <div class="ph-dot ph-dot-y"></div>
+              <div class="ph-dot ph-dot-g"></div>
+            </div>
+            <div class="ph-lines">
+              <div class="ph-line" style="width:90%;"></div>
+              <div class="ph-line" style="width:70%;"></div>
+              <div class="ph-line" style="width:85%;"></div>
+              <div class="ph-line" style="width:55%;"></div>
+            </div>
+            <div class="ph-badge">📲 LINE通知画面</div>
+          </div>
+        </div>
+        <div class="screen-caption">
+          <span class="caption-icon">📲</span>
+          <p class="caption-text">毎日22時に実行され、予定がLINEに通知される画面</p>
+        </div>
+      </div>
+
+      <!-- 画面②：ターミナル実行ログ -->
+      <div class="screen-card" onclick="openModal('modal-2')">
+        <div class="screen-img-wrap">
+          <img src="" alt="ターミナルログ" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+          <div class="screen-placeholder" style="display:flex;">
+            <div class="ph-bar">
+              <div class="ph-dot ph-dot-r"></div>
+              <div class="ph-dot ph-dot-y"></div>
+              <div class="ph-dot ph-dot-g"></div>
+            </div>
+            <div class="ph-lines">
+              <div class="ph-line" style="width:80%;"></div>
+              <div class="ph-line" style="width:95%;"></div>
+              <div class="ph-line" style="width:65%;"></div>
+              <div class="ph-line" style="width:75%;"></div>
+            </div>
+            <div class="ph-badge">⚡ ターミナルログ</div>
+          </div>
+        </div>
+        <div class="screen-caption">
+          <span class="caption-icon">⚡</span>
+          <p class="caption-text">startup.py 起動時の ngrok URL 取得・Webhook 設定完了ログ</p>
+        </div>
+      </div>
+
+      <!-- 画面③：カレンダー確認 -->
+      <div class="screen-card" onclick="openModal('modal-3')">
+        <div class="screen-img-wrap">
+          <img src="" alt="カレンダー画面" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+          <div class="screen-placeholder" style="display:flex;">
+            <div class="ph-bar">
+              <div class="ph-dot ph-dot-r"></div>
+              <div class="ph-dot ph-dot-y"></div>
+              <div class="ph-dot ph-dot-g"></div>
+            </div>
+            <div class="ph-lines">
+              <div class="ph-line" style="width:60%;"></div>
+              <div class="ph-line" style="width:88%;"></div>
+              <div class="ph-line" style="width:72%;"></div>
+              <div class="ph-line" style="width:50%;"></div>
+            </div>
+            <div class="ph-badge">📅 Google Calendar</div>
+          </div>
+        </div>
+        <div class="screen-caption">
+          <span class="caption-icon">📅</span>
+          <p class="caption-text">Google Calendar から取得した翌日の予定一覧</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- モーダル①〜③ -->
+  <div class="modal-overlay" id="modal-1" onclick="closeModal(event, 'modal-1')">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">📲 LINE通知画面</span>
+        <button class="modal-close" onclick="document.getElementById('modal-1').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-img-wrap">
+        <img src="" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+        <div class="screen-placeholder" style="display:flex; aspect-ratio:16/10;">
+          <div class="ph-bar"><div class="ph-dot ph-dot-r"></div><div class="ph-dot ph-dot-y"></div><div class="ph-dot ph-dot-g"></div></div>
+          <div class="ph-lines"><div class="ph-line" style="width:90%;"></div><div class="ph-line" style="width:70%;"></div><div class="ph-line" style="width:85%;"></div><div class="ph-line" style="width:55%;"></div></div>
+        </div>
+      </div>
+      <div class="modal-caption">毎日22時に実行され、予定がLINEに通知される画面</div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-2" onclick="closeModal(event, 'modal-2')">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">⚡ ターミナルログ</span>
+        <button class="modal-close" onclick="document.getElementById('modal-2').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-img-wrap">
+        <img src="" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+        <div class="screen-placeholder" style="display:flex; aspect-ratio:16/10;">
+          <div class="ph-bar"><div class="ph-dot ph-dot-r"></div><div class="ph-dot ph-dot-y"></div><div class="ph-dot ph-dot-g"></div></div>
+          <div class="ph-lines"><div class="ph-line" style="width:80%;"></div><div class="ph-line" style="width:95%;"></div><div class="ph-line" style="width:65%;"></div></div>
+        </div>
+      </div>
+      <div class="modal-caption">startup.py 起動時の ngrok URL 取得・Webhook 設定完了ログ</div>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="modal-3" onclick="closeModal(event, 'modal-3')">
+    <div class="modal-box">
+      <div class="modal-header">
+        <span class="modal-title">📅 Google Calendar</span>
+        <button class="modal-close" onclick="document.getElementById('modal-3').classList.remove('open')">✕</button>
+      </div>
+      <div class="modal-img-wrap">
+        <img src="" alt="" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';" />
+        <div class="screen-placeholder" style="display:flex; aspect-ratio:16/10;">
+          <div class="ph-bar"><div class="ph-dot ph-dot-r"></div><div class="ph-dot ph-dot-y"></div><div class="ph-dot ph-dot-g"></div></div>
+          <div class="ph-lines"><div class="ph-line" style="width:60%;"></div><div class="ph-line" style="width:88%;"></div><div class="ph-line" style="width:72%;"></div></div>
+        </div>
+      </div>
+      <div class="modal-caption">Google Calendar から取得した翌日の予定一覧</div>
+    </div>
+  </div>
+
+  <script>
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(e, id) {
+      if (e.target === e.currentTarget) {
+        document.getElementById(id).classList.remove('open');
+        document.body.style.overflow = '';
+      }
+    }
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.modal-overlay.open').forEach(function(m) {
+          m.classList.remove('open');
+        });
+        document.body.style.overflow = '';
+      }
+    });
+  </script>
 
   <!-- 工夫したポイント -->
   <div class="panel">
