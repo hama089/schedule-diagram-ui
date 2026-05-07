@@ -637,12 +637,19 @@
     }
 
     /* ━━━ 実際の画面 ━━━ */
-    .actual-screen-wrap {
-      cursor: pointer;
+    .actual-screen-grid {
+      display: grid;
+      grid-template-columns: 1fr 2fr;
+      gap: 20px;
+      align-items: start;
+    }
+
+    .actual-screen-item {
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 16px;
+      gap: 12px;
+      cursor: pointer;
     }
 
     .actual-img-frame {
@@ -651,7 +658,6 @@
       overflow: hidden;
       box-shadow: 8px 8px 22px var(--sd), -6px -6px 16px var(--sl);
       transition: transform 0.3s ease, box-shadow 0.3s ease;
-      max-width: 360px;
       width: 100%;
     }
     .actual-img-frame:hover {
@@ -679,12 +685,16 @@
     }
 
     .actual-caption {
-      font-size: 0.68rem;
+      font-size: 0.62rem;
       font-weight: 300;
       color: var(--sub);
-      letter-spacing: 0.05em;
+      letter-spacing: 0.04em;
       line-height: 1.7;
       text-align: center;
+    }
+
+    @media (max-width: 640px) {
+      .actual-screen-grid { grid-template-columns: 1fr; }
     }
 
     /* モーダル */
@@ -1116,42 +1126,72 @@
       <div class="section-line"></div>
     </div>
 
-    <div class="actual-screen-wrap" onclick="openScreenModal()">
-      <div class="actual-img-frame">
-        <img src="screenshots/line-notification.png" alt="LINE通知画面" />
-        <div class="zoom-hint">🔍 クリックで拡大</div>
+    <div class="actual-screen-grid">
+
+      <!-- LINE通知 -->
+      <div class="actual-screen-item" onclick="openModal('modal-line')">
+        <div class="actual-img-frame">
+          <img src="screenshots/line-notification.png" alt="LINE通知画面" />
+          <div class="zoom-hint">🔍 クリックで拡大</div>
+        </div>
+        <p class="actual-caption">📲 毎日22時に実行され、明日の予定・変更があった予定がLINEへ自動通知される画面</p>
       </div>
-      <p class="actual-caption">📲 毎日22時に実行され、明日の予定・変更があった予定がLINEへ自動通知される画面</p>
+
+      <!-- Google Calendar -->
+      <div class="actual-screen-item" onclick="openModal('modal-cal')">
+        <div class="actual-img-frame">
+          <img src="screenshots/google-calendar.png" alt="Google Calendar画面" />
+          <div class="zoom-hint">🔍 クリックで拡大</div>
+        </div>
+        <p class="actual-caption">📅 Google Calendar に登録されたスケジュール。LINEで通知された予定と連動して確認できる画面</p>
+      </div>
+
     </div>
   </div>
 
-  <!-- モーダル -->
-  <div class="modal-overlay" id="screen-modal" onclick="closeScreenModal(event)">
-    <div class="modal-box">
+  <!-- モーダル：LINE -->
+  <div class="modal-overlay" id="modal-line" onclick="closeModal(event,'modal-line')">
+    <div class="modal-box" style="max-width:420px;">
       <div class="modal-header">
         <span class="modal-title">📲 LINE通知画面 — 毎日22:00 自動送信</span>
-        <button class="modal-close" onclick="document.getElementById('screen-modal').classList.remove('open'); document.body.style.overflow=''">✕</button>
+        <button class="modal-close" onclick="closeById('modal-line')">✕</button>
       </div>
       <div style="overflow:auto; max-height:80vh;">
-        <img src="screenshots/line-notification.png" alt="LINE通知画面" style="width:100%; display:block;" />
+        <img src="screenshots/line-notification.png" alt="LINE通知" style="width:100%; display:block;" />
+      </div>
+    </div>
+  </div>
+
+  <!-- モーダル：Google Calendar -->
+  <div class="modal-overlay" id="modal-cal" onclick="closeModal(event,'modal-cal')">
+    <div class="modal-box" style="max-width:860px;">
+      <div class="modal-header">
+        <span class="modal-title">📅 Google Calendar — スケジュール確認画面</span>
+        <button class="modal-close" onclick="closeById('modal-cal')">✕</button>
+      </div>
+      <div style="overflow:auto; max-height:80vh;">
+        <img src="screenshots/google-calendar.png" alt="Google Calendar" style="width:100%; display:block;" />
       </div>
     </div>
   </div>
 
   <script>
-    function openScreenModal() {
-      document.getElementById('screen-modal').classList.add('open');
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
       document.body.style.overflow = 'hidden';
     }
-    function closeScreenModal(e) {
-      if (e.target === e.currentTarget) {
-        document.getElementById('screen-modal').classList.remove('open');
-        document.body.style.overflow = '';
-      }
+    function closeModal(e, id) {
+      if (e.target === e.currentTarget) closeById(id);
+    }
+    function closeById(id) {
+      document.getElementById(id).classList.remove('open');
+      document.body.style.overflow = '';
     }
     document.addEventListener('keydown', function(e) {
       if (e.key === 'Escape') {
-        document.getElementById('screen-modal').classList.remove('open');
+        document.querySelectorAll('.modal-overlay.open').forEach(function(m) {
+          m.classList.remove('open');
+        });
         document.body.style.overflow = '';
       }
     });
